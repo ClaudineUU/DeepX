@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Edit2 } from 'lucide-react';
 import { Timer } from './components/Timer';
 import { TaskList } from './components/TaskList';
 import { Stats } from './components/Stats';
@@ -33,6 +34,11 @@ export default function App() {
     const saved = localStorage.getItem('deepfocus_theme');
     return saved === 'dark';
   });
+  const [userName, setUserName] = useState(() => {
+    return localStorage.getItem('deepfocus_username') || '朋友';
+  });
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
 
   useEffect(() => {
     localStorage.setItem('deepfocus_tasks', JSON.stringify(tasks));
@@ -59,6 +65,10 @@ export default function App() {
       localStorage.setItem('deepfocus_theme', 'light');
     }
   }, [isDarkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('deepfocus_username', userName);
+  }, [userName]);
 
   const handleAddTask = (title: string) => {
     const newTask: Task = {
@@ -109,7 +119,46 @@ export default function App() {
           <div className="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center shadow-lg shadow-brand-orange/20">
             <span className="text-white font-black text-xl">D</span>
           </div>
-          <h1 className="text-xl font-black tracking-tighter uppercase">深焦 DeepFocus</h1>
+          <h1 className="text-xl font-black tracking-tighter uppercase">DeepFocus</h1>
+        </div>
+
+        <div className="flex items-center">
+          {isEditingName ? (
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (tempName.trim()) setUserName(tempName.trim());
+                setIsEditingName(false);
+              }}
+            >
+              <input
+                autoFocus
+                type="text"
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+                onBlur={() => {
+                  if (tempName.trim()) setUserName(tempName.trim());
+                  setIsEditingName(false);
+                }}
+                className="px-3 py-1.5 text-sm rounded-lg bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-brand-orange outline-none w-32 transition-all"
+                maxLength={12}
+              />
+            </form>
+          ) : (
+            <div 
+              onClick={() => {
+                setTempName(userName);
+                setIsEditingName(true);
+              }}
+              className="cursor-pointer flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+              title="点击修改昵称"
+            >
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                Hi, <span className="font-bold text-brand-orange">{userName}</span>
+              </span>
+              <Edit2 className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          )}
         </div>
       </header>
 
